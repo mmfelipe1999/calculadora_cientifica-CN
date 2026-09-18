@@ -91,6 +91,19 @@ def seno_taylor(num, tipo):
         k = k + 1
     return round(seno,10)
 
+def cosseno_taylor(num, tipo):
+    # Se o tipo for graus, converte num para radianos usando pi_taylor
+    if tipo.lower() == "graus":
+        num = num * (pi_taylor() / 180)
+
+    cos = 0
+    k = 0
+    while k <= 15:
+        n = 2 * k
+        termo = (((-1) ** k) * (num**n)) / fatorial(n)
+        cos += termo
+        k = k + 1
+    return round(cos,10)
 
 # ==================================
 # INTERFACE DO USUÁRIO
@@ -134,3 +147,11 @@ if operacao == "seno":
     resultado = seno_taylor(num, tipo)
 
     print(f"O resultado do seno é: {resultado} para x = {num}")
+
+if operacao == "cosseno":
+    entrada = input("Digite o valor de X: ")
+    num = processar_entrada(entrada)
+    tipo = input("RESULTADO EM GRAUS OU RADIANOS?: ")
+    resultado = cosseno_taylor(num, tipo)
+
+    print(f"O resultado do cosseno é: {resultado} para x = {num}")
