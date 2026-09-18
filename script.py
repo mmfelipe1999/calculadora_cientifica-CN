@@ -9,10 +9,10 @@ def fatorial(num):
         contador = contador + 1
     return resultado
 
-def exp(num):
+def exp_taylor(num):
     soma = 1
     k = 1
-    while k <= 500:
+    while k <= 100:
         termo = (num**k)/fatorial(k)
         soma = soma + termo
         k = k + 1
@@ -28,9 +28,15 @@ def ln_taylor(num):
         soma += termo 
         k = k + 1
     return 2 * soma
+
+def log_taylor(num):
+    log = ln_taylor(num)/ln_taylor(10)
+    return log
+
+def potencia10(num):
+    potencia = 10 ** num
+    return potencia
     
-
-
 
 print("Olá, bem vindo a calculadora científica")
 operacao = input("Digite a operação que você deseja realizar: ")
@@ -42,10 +48,20 @@ if operacao == "fatorial":
 
 if operacao == "exponencial":
     num = int(input("Digite o valor de X: "))
-    resultado = exp(num)
+    resultado = exp_taylor(num)
     print(f"O resultado do exponencial é: {resultado}")
 
 if operacao == "ln":
     num = float(input("Digite o valor de X [O NUMERO DEVE SER OBRIGATORIAMENTE DIFERENTE DE ZERO]: "))
     resultado = ln_taylor(num)
+    print(f"O resultado do ln é: {resultado}")
+
+if operacao == "log":
+    num = float(input("Digite o valor de X: "))
+    resultado = log_taylor(num)
+    print(f"O resultado do ln é: {resultado}")
+
+if operacao == "potencia":
+    num = float(input("Digite o valor de X: "))
+    resultado = potencia10(num)
     print(f"O resultado do ln é: {resultado}")
