@@ -79,7 +79,7 @@ def potencia10(num):
 
 def seno_taylor(num, tipo):
     # Se o tipo for graus, converte num para radianos usando pi_taylor
-    if tipo.lower() == "graus":
+    if tipo == "graus":
         num = num * (pi_taylor() / 180)
 
     seno = 0
@@ -93,7 +93,7 @@ def seno_taylor(num, tipo):
 
 def cosseno_taylor(num, tipo):
     # Se o tipo for graus, converte num para radianos usando pi_taylor
-    if tipo.lower() == "graus":
+    if tipo == "graus":
         num = num * (pi_taylor() / 180)
 
     cos = 0
@@ -105,8 +105,16 @@ def cosseno_taylor(num, tipo):
         k = k + 1
     return round(cos,10)
 
+def tangente_taylor(num, tipo):
+    if tipo.lower() == "graus":
+        num = num * (pi_taylor() / 180)
+
+    tang = seno_taylor(num, "radianos") / cosseno_taylor(num, "radianos")
+    return round(tang, 10)
+    
+
 # ==================================
-# INTERFACE DO USUÁRIO
+# CALCULADORA CIENTIFICA BABADEIRA
 # ==================================
 print("Olá, bem vindo a calculadora científica")
 operacao = input("Digite a operação que você deseja realizar: ").lower().strip()
@@ -155,3 +163,11 @@ if operacao == "cosseno":
     resultado = cosseno_taylor(num, tipo)
 
     print(f"O resultado do cosseno é: {resultado} para x = {num}")
+  
+if operacao == "tangente":
+    entrada = input("Digite o valor de X: ")
+    num = processar_entrada(entrada)
+    tipo = input("RESULTADO EM GRAUS OU RADIANOS?: ")
+    resultado = tangente_taylor(num, tipo)
+
+    print(f"O resultado da tangente é: {resultado} para x = {num}")
