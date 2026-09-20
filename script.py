@@ -111,6 +111,21 @@ def tangente_taylor(num, tipo):
 
     tang = seno_taylor(num, "radianos") / cosseno_taylor(num, "radianos")
     return round(tang, 10)
+
+def senh_taylor(num):
+    
+    primeiro_termo = exp_taylor(num)
+    segundo_termo = exp_taylor(-num)
+    soma = (primeiro_termo - segundo_termo) / 2
+    return soma
+
+def cosh_taylor(num):
+    
+        
+    primeiro_termo = exp_taylor(num)
+    segundo_termo = exp_taylor(-num)
+    soma = (primeiro_termo + segundo_termo) / 2
+    return soma
     
 
 # ==================================
@@ -171,3 +186,16 @@ if operacao == "tangente":
     resultado = tangente_taylor(num, tipo)
 
     print(f"O resultado da tangente é: {resultado} para x = {num}")
+
+if operacao == "senh":
+    entrada = input("Digite o valor de X: ")
+    num = processar_entrada(entrada)
+    resultado = senh_taylor(num)
+    print(f"O resultado do seno hiperbólico é: {resultado} para x = {num}")
+
+if operacao == "cosh":
+    entrada = input("Digite o valor de X: ")
+    num = processar_entrada(entrada)
+    resultado = cosh_taylor(num)
+    print(f"O resultado do seno hiperbólico é: {resultado} para x = {num}")
+    
