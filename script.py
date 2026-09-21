@@ -3,6 +3,8 @@
 # ==================================
 import re
 
+def criar_grafico():
+    pass
 
 def pi_taylor():
     # Calcula arctan(x) usando Taylor (Fórmula de Machin para Pi exato)
@@ -138,11 +140,17 @@ if operacao == "fatorial":
     num = int(input("Digite o numero que você quer calcular o fatorial: "))
     resultado = fatorial(num)
     print(f"O resultado do fatorial é: {resultado}")
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
 
 if operacao == "exponencial":
     num = int(input("Digite o valor de X: "))
     resultado = exp_taylor(num)
     print(f"O resultado do exponencial é: {resultado}")
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
 
 if operacao == "ln":
     num = float(
@@ -152,16 +160,25 @@ if operacao == "ln":
     )
     resultado = ln_taylor(num)
     print(f"O resultado do ln é: {resultado}")
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
 
 if operacao == "log":
     num = float(input("Digite o valor de X: "))
     resultado = log_taylor(num)
     print(f"O resultado do log é: {resultado}")
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
 
 if operacao == "potencia":
     num = float(input("Digite o valor de X: "))
     resultado = potencia10(num)
     print(f"O resultado da potência é: {resultado}")
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
 
 if operacao == "seno":
     entrada = input("Digite o valor de X: ")
@@ -170,6 +187,9 @@ if operacao == "seno":
     resultado = seno_taylor(num, tipo)
 
     print(f"O resultado do seno é: {resultado} para x = {num}")
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
 
 if operacao == "cosseno":
     entrada = input("Digite o valor de X: ")
@@ -178,6 +198,9 @@ if operacao == "cosseno":
     resultado = cosseno_taylor(num, tipo)
 
     print(f"O resultado do cosseno é: {resultado} para x = {num}")
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
   
 if operacao == "tangente":
     entrada = input("Digite o valor de X: ")
@@ -186,16 +209,24 @@ if operacao == "tangente":
     resultado = tangente_taylor(num, tipo)
 
     print(f"O resultado da tangente é: {resultado} para x = {num}")
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
 
 if operacao == "senh":
     entrada = input("Digite o valor de X: ")
     num = processar_entrada(entrada)
     resultado = senh_taylor(num)
     print(f"O resultado do seno hiperbólico é: {resultado} para x = {num}")
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
 
 if operacao == "cosh":
     entrada = input("Digite o valor de X: ")
     num = processar_entrada(entrada)
     resultado = cosh_taylor(num)
     print(f"O resultado do seno hiperbólico é: {resultado} para x = {num}")
-    
+    criar = input("Você deseja criar o gráfico dessa função? [sim/não] ")
+    if criar == "sim":
+        criar_grafico()
