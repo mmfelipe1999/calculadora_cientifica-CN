@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Científica Babadeira</title>
+    
+    <!-- Importando Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Importando fonte Poppins do Google Fonts para um visual moderno -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --neon-purple: #0051ff; /* Alterado para Azul Escuro/Neon */
+            --neon-pink: #00d2ff;   /* Alterado para Ciano brilhante */
+            --bg-dark: #020617;     /* Fundo mais escuro e azulado */
+            --glass-bg: rgba(15, 25, 45, 0.6);
+            --glass-border: rgba(0, 210, 255, 0.3);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 210, 255, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 81, 255, 0.08), transparent 25%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Efeito de Vidro Fosco (Glassmorphism) */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        /* Textos com brilho neon */
+        .text-neon {
+            color: #fff;
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px var(--neon-purple),
+                0 0 40px var(--neon-purple);
+        }
+
+        /* Inputs estilizados */
+        .input-babadeira {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        .input-babadeira:focus {
+            outline: none;
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(255, 41, 184, 0.4);
+        }
+
+        /* Botões com gradiente e hover luminoso */
+        .btn-neon {
+            background: linear-gradient(45deg, var(--neon-purple), var(--neon-pink));
+            background-size: 200% auto;
+            color: white;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .btn-neon::before {
+            content: "";
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-purple), var(--neon-pink));
+            z-index: -1;
+            filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: inherit;
+        }
+
+        .btn-neon:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+        }
+
+        .btn-neon:hover::before {
+            opacity: 1;
+        }
+
+        .btn-outline-neon {
+            background: transparent;
+            border: 2px solid var(--neon-purple);
+            color: #fff;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px var(--neon-purple);
+            box-shadow: 0 0 10px rgba(184, 41, 255, 0.2) inset, 0 0 10px rgba(184, 41, 255, 0.2);
+        }
+
+        .btn-outline-neon:hover {
+            background: rgba(184, 41, 255, 0.2);
+            box-shadow: 0 0 20px rgba(184, 41, 255, 0.5) inset, 0 0 20px rgba(184, 41, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Canvas do Gráfico */
+        #graficoCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            border-radius: 0.75rem;
+        }
+
+        /* Custom Scrollbar para o select */
+        select option {
+            background-color: var(--bg-dark);
+            color: #fff;
+        }
+        
+        /* Animação do resultado */
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex items-center justify-center min-h-screen">
+
+    <main class="w-full max-w-6xl mx-auto glass-panel rounded-3xl overflow-hidden shadow-2xl flex flex-col lg:flex-row">
+        
+        <!-- ========================================== -->
+        <!-- LADO ESQUERDO: CONTROLES DA CALCULADORA    -->
+        <!-- ========================================== -->
+        <section class="w-full lg:w-1/3 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-[rgba(184,41,255,0.2)] flex flex-col gap-6">
+            
+            <div class="text-center mb-4">
+                <h1 class="text-3xl font-bold text-neon uppercase tracking-wider">Babadeira</h1>
+                <p class="text-sm text-purple-300 mt-1 uppercase tracking-widest opacity-80">Calculadora Científica</p>
+            </div>
+
+            <!-- Entrada de Dados (X) -->
+            <div class="flex flex-col gap-2">
+                <label for="inputX" class="text-sm font-semibold text-purple-200 uppercase tracking-wide">Valor de X / Expressão:</label>
+                <input type="text" id="inputX" placeholder="Ex: 2.5 ou 3*pi" 
+                       class="input-babadeira w-full p-4 rounded-xl text-lg font-mono placeholder-purple-800/50">
+            </div>
+            
+            <!-- Entrada de Índice (para a Raiz) -->
+            <div class="flex flex-col gap-2 hidden transition-all" id="containerIndice">
+                <label for="inputIndice" class="text-sm font-semibold text-purple-200 uppercase tracking-wide">Índice da Raiz:</label>
+                <input type="number" id="inputIndice" placeholder="Ex: 2 para quadrada, 3 para cúbica" 
+                       class="input-babadeira w-full p-4 rounded-xl text-lg font-mono placeholder-purple-800/50">
+            </div>
+
+            <!-- Seleção de Operação -->
+            <div class="flex flex-col gap-2">
+                <label for="operacao" class="text-sm font-semibold text-purple-200 uppercase tracking-wide">Operação:</label>
+                <select id="operacao" class="input-babadeira w-full p-4 rounded-xl text-md cursor-pointer appearance-none">
+                    <option value="fatorial">Fatorial (x!)</option>
+                    <option value="exponencial">Exponencial (e^x)</option>
+                    <option value="ln">Logaritmo Natural (ln)</option>
+                    <option value="log">Logaritmo Base 10 (log)</option>
+                    <option value="potencia">Potência de 10 (10^x)</option>
+                    <option value="seno" selected>Seno (sin)</option>
+                    <option value="cosseno">Cosseno (cos)</option>
+                    <option value="tangente">Tangente (tan)</option>
+                    <option value="senh">Seno Hiperbólico (senh)</option>
+                    <option value="cosh">Cosseno Hiperbólico (cosh)</option>
+                    <option value="raiz">Raiz</option>
+                </select>
+            </div>
+
+            <!-- Graus / Radianos (Rádios) -->
+            <div class="flex flex-col gap-3" id="containerAngulo">
+                <label class="text-sm font-semibold text-purple-200 uppercase tracking-wide">Unidade de Ângulo:</label>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="radio" name="tipoAngulo" value="radianos" checked class="hidden peer">
+                        <div class="w-5 h-5 rounded-full border-2 border-purple-500 peer-checked:bg-neon-pink peer-checked:border-neon-pink peer-checked:shadow-[0_0_10px_#ff29b8] transition-all"></div>
+                        <span class="text-purple-100 group-hover:text-white transition-colors">Radianos</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="radio" name="tipoAngulo" value="graus" class="hidden peer">
+                        <div class="w-5 h-5 rounded-full border-2 border-purple-500 peer-checked:bg-neon-pink peer-checked:border-neon-pink peer-checked:shadow-[0_0_10px_#ff29b8] transition-all"></div>
+                        <span class="text-purple-100 group-hover:text-white transition-colors">Graus</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="flex flex-col gap-3 mt-4">
+                <button onclick="realizarCalculo()" class="btn-neon w-full py-4 rounded-xl font-bold uppercase tracking-wider text-lg">
+                    Calcular Resultado
+                </button>
+                <button onclick="simularGrafico()" class="btn-outline-neon w-full py-3 rounded-xl font-bold uppercase tracking-wider">
+                    Gerar Gráfico
+                </button>
+            </div>
+
+            <!-- Resultado Numérico -->
+            <div id="boxResultado" class="hidden mt-4 p-5 rounded-xl border border-purple-500/50 bg-purple-900/20 shadow-[0_0_20px_rgba(184,41,255,0.15)] relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-neon-purple to-neon-pink"></div>
+                <p class="text-xs text-purple-300 uppercase tracking-widest mb-1">Resultado:</p>
+                <p id="textoResultado" class="text-2xl font-mono text-white break-all"></p>
+                <p id="textoDetalhe" class="text-xs text-purple-400 mt-2 opacity-70"></p>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- LADO DIREITO: ÁREA DO GRÁFICO (CANVAS)     -->
+        <!-- ========================================== -->
+        <section class="w-full lg:w-2/3 p-6 md:p-8 flex flex-col">
+            
+            <div class="flex justify-between items-end mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-6 h-6 text-neon-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                        Visualização Gráfica
+                    </h2>
+                    <p class="text-sm text-purple-300">Análise da função <span id="labelFuncao" class="font-bold text-neon-purple">Seno</span></p>
+                </div>
+                <div class="hidden md:flex gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_5px_red]"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500 shadow-[0_0_5px_yellow]"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_5px_green]"></div>
+                </div>
+            </div>
+
+            <!-- Container do Canvas -->
+            <div class="flex-grow bg-[#020617] border border-[rgba(0,210,255,0.3)] rounded-2xl relative shadow-[inset_0_0_30px_rgba(0,0,0,0.8)] overflow-hidden min-h-[300px] md:min-h-[400px]">
+                
+                <!-- Grid de Fundo Fake do Gráfico -->
+                <div class="absolute inset-0 z-0 opacity-20 pointer-events-none" 
+                     style="background-image: linear-gradient(rgba(0, 210, 255, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 210, 255, 0.5) 1px, transparent 1px); background-size: 40px 40px;">
+                </div>
+
+                <!-- Canvas Onde a Mágica (ou o placeholder) acontece -->
+                <canvas id="graficoCanvas" class="relative z-10"></canvas>
+                
+                <!-- Mensagem de Overlay Placeholder -->
+                <div id="overlayGrafico" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#020617]/70 backdrop-blur-sm transition-opacity duration-500">
+                    <svg class="w-16 h-16 text-neon-pink mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+                    <p class="text-cyan-200 font-mono text-center px-4">O gráfico babadeiro aparecerá aqui.<br>Clique em "Gerar Gráfico".</p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        // Elementos do DOM
+        const inputX = document.getElementById('inputX');
+        const inputIndice = document.getElementById('inputIndice');
+        const containerIndice = document.getElementById('containerIndice');
+        const operacaoSelect = document.getElementById('operacao');
+        const containerAngulo = document.getElementById('containerAngulo');
+        const boxResultado = document.getElementById('boxResultado');
+        const textoResultado = document.getElementById('textoResultado');
+        const textoDetalhe = document.getElementById('textoDetalhe');
+        const overlayGrafico = document.getElementById('overlayGrafico');
+        const labelFuncao = document.getElementById('labelFuncao');
+        
+        // Canvas Setup
+        const canvas = document.getElementById('graficoCanvas');
+        const ctx = canvas.getContext('2d');
+        let animacaoID;
+        let tempoAnima = 0;
+
+        // Ocultar/Mostrar seleção de Ângulos dependendo da operação
+        operacaoSelect.addEventListener('change', (e) => {
+            const op = e.target.value;
+            labelFuncao.innerText = e.target.options[e.target.selectedIndex].text;
+            
+            if(['seno', 'cosseno', 'tangente'].includes(op)) {
+                containerAngulo.style.opacity = '1';
+                containerAngulo.style.pointerEvents = 'auto';
+            } else {
+                containerAngulo.style.opacity = '0.3';
+                containerAngulo.style.pointerEvents = 'none';
+            }
+            
+            // Ocultar/Mostrar input de Índice
+            if(op === 'raiz') {
+                containerIndice.classList.remove('hidden');
+            } else {
+                containerIndice.classList.add('hidden');
+            }
+        });
+
+        // Ajusta tamanho do canvas
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        
+        // --- FUNÇÕES MATEMÁTICAS REAIS (SÉRIES DE TAYLOR) ---
+        function pi_taylor() {
+            function arctan_taylor(x) {
+                let soma = 0;
+                for (let k = 0; k < 20; k++) {
+                    let termo = (Math.pow(-1, k) * Math.pow(x, 2 * k + 1)) / (2 * k + 1);
+                    soma += termo;
+                }
+                return soma;
+            }
+            return 4 * (4 * arctan_taylor(1 / 5) - arctan_taylor(1 / 239));
+        }
+
+        const PI = pi_taylor();
+
+        function processar_entrada(texto) {
+            texto = texto.toLowerCase().replace(/\s/g, "");
+            texto = texto.replace(/(\d)(pi)/g, "$1*$2");
+            texto = texto.replace(/pi/g, PI.toString());
+            try {
+                // Executa a string como expressão matemática (ex: 3*3.14)
+                return Number(new Function("return " + texto)());
+            } catch(e) {
+                throw new Error("Expressão inválida!");
+            }
+        }
+
+        function fatorial(num) {
+            if (num < 0 || !Number.isInteger(num)) return NaN;
+            let resultado = 1;
+            for (let contador = 1; contador <= num; contador++) {
+                resultado *= contador;
+            }
+            return resultado;
+        }
+
+        function exp_taylor(num) {
+            let soma = 1;
+            for (let k = 1; k <= 100; k++) {
+                soma += Math.pow(num, k) / fatorial(k);
+            }
+            return soma;
+        }
+
+        function ln_taylor(num) {
+            if (num <= 0) return NaN;
+            let soma = 0;
+            let y = (num - 1) / (num + 1);
+            for (let k = 0; k <= 500; k++) {
+                let n = 2 * k + 1;
+                soma += Math.pow(y, n) / n;
+            }
+            return 2 * soma;
+        }
+
+        function log_taylor(num) {
+            return ln_taylor(num) / ln_taylor(10);
+        }
+
+        function potencia10(num) {
+            return Math.pow(10, num);
+        }
+
+        function seno_taylor(num, tipo) {
+            if (tipo === "graus") num = num * (PI / 180);
+            let seno = 0;
+            for (let k = 0; k <= 15; k++) {
+                let n = 2 * k + 1;
+                seno += (Math.pow(-1, k) * Math.pow(num, n)) / fatorial(n);
+            }
+            return Number(seno.toFixed(10));
+        }
+
+        function cosseno_taylor(num, tipo) {
+            if (tipo === "graus") num = num * (PI / 180);
+            let cos = 0;
+            for (let k = 0; k <= 15; k++) {
+                let n = 2 * k;
+                cos += (Math.pow(-1, k) * Math.pow(num, n)) / fatorial(n);
+            }
+            return Number(cos.toFixed(10));
+        }
+
+        function tangente_taylor(num, tipo) {
+            if (tipo === "graus") num = num * (PI / 180);
+            let tang = seno_taylor(num, "radianos") / cosseno_taylor(num, "radianos");
+            return Number(tang.toFixed(10));
+        }
+
+        function senh_taylor(num) {
+            return (exp_taylor(num) - exp_taylor(-num)) / 2;
+        }
+
+        function cosh_taylor(num) {
+            return (exp_taylor(num) + exp_taylor(-num)) / 2;
+        }
+
+        function raiz_taylor(num, indice) {
+            let expoente = 1 / indice;
+            let raiz = exp_taylor(expoente * ln_taylor(num));
+
+            let inteiro_mais_proximo = Math.round(raiz);
+            if (Math.abs(raiz - inteiro_mais_proximo) < 1e-9) {
+                return inteiro_mais_proximo;
+            } else {
+                return Number(raiz.toFixed(10));
+            }
+        }
+
+        // Substituindo a lógica FAKE pela REAL
+        function realizarCalculo() {
+            let valorRaw = inputX.value.trim();
+            if(!valorRaw) {
+                mostrarResultado("Erro!", "Por favor, digite um valor para X.");
+                return;
+            }
+            
+            const btn = document.querySelector('.btn-neon');
+            const textoOriginal = btn.innerText;
+            btn.innerText = "Calculando...";
+            btn.style.opacity = "0.7";
+            
+            setTimeout(() => {
+                try {
+                    const op = operacaoSelect.value;
+                    const num = processar_entrada(valorRaw);
+                    const indiceRaw = inputIndice.value.trim();
+                    const tipoAngulo = document.querySelector('input[name="tipoAngulo"]:checked').value;
+                    
+                    let resultado = 0;
+                    
+                    // Chama a função matemática correspondente
+                    if (op === "fatorial") resultado = fatorial(num);
+                    else if (op === "exponencial") resultado = exp_taylor(num);
+                    else if (op === "ln") resultado = ln_taylor(num);
+                    else if (op === "log") resultado = log_taylor(num);
+                    else if (op === "potencia") resultado = potencia10(num);
+                    else if (op === "seno") resultado = seno_taylor(num, tipoAngulo);
+                    else if (op === "cosseno") resultado = cosseno_taylor(num, tipoAngulo);
+                    else if (op === "tangente") resultado = tangente_taylor(num, tipoAngulo);
+                    else if (op === "senh") resultado = senh_taylor(num);
+                    else if (op === "cosh") resultado = cosh_taylor(num);
+                    else if (op === "raiz") {
+                         if(!indiceRaw || isNaN(indiceRaw) || Number(indiceRaw) === 0) {
+                             throw new Error("Índice de raiz inválido. Digite um número diferente de zero.");
+                         }
+                         resultado = raiz_taylor(num, Number(indiceRaw));
+                    }
+
+                    // Validação de erro matemático (Ex: Ln de 0)
+                    if (isNaN(resultado)) {
+                        mostrarResultado("Erro!", "Verifique o domínio da função ou o valor digitado.");
+                    } else {
+                        let detalhe = `Cálculo realizado via Série de Taylor para ${op.toUpperCase()}. (X lido = ${num})`;
+                        mostrarResultado(resultado, detalhe);
+                    }
+                } catch (e) {
+                    mostrarResultado("Erro!", e.message); // Captura erro da "processar_entrada"
+                }
+                
+                btn.innerText = textoOriginal;
+                btn.style.opacity = "1";
+            }, 300); // Delay curto apenas para manter o charme visual do botão
+        }
+
+        function mostrarResultado(resultado, detalhe) {
+            boxResultado.classList.remove('hidden');
+            boxResultado.classList.remove('animate-pop');
+            
+            // Força reflow para reiniciar animação CSS
+            void boxResultado.offsetWidth;
+            
+            boxResultado.classList.add('animate-pop');
+            textoResultado.innerText = resultado;
+            textoDetalhe.innerText = detalhe;
+        }
+
+        // Função ajudante para calcular Y baseado na operação e no X do gráfico
+        function calcularValor(op, x, tipoAngulo) {
+            if (op === "exponencial") return exp_taylor(x);
+            if (op === "ln") return x > 0 ? ln_taylor(x) : NaN;
+            if (op === "log") return x > 0 ? log_taylor(x) : NaN;
+            if (op === "potencia") return potencia10(x);
+            if (op === "seno") return seno_taylor(x, tipoAngulo);
+            if (op === "cosseno") return cosseno_taylor(x, tipoAngulo);
+            if (op === "tangente") return tangente_taylor(x, tipoAngulo);
+            if (op === "senh") return senh_taylor(x);
+            if (op === "cosh") return cosh_taylor(x);
+            if (op === "raiz") {
+                 let ind = Number(inputIndice.value.trim()) || 2;
+                 return x > 0 ? raiz_taylor(x, ind) : NaN;
+            }
+            return NaN;
+        }
+
+        // Gera o Gráfico no Canvas (Agora 100% Dinâmico)
+        function simularGrafico() {
+            let valorRaw = inputX.value.trim();
+            if(!valorRaw) valorRaw = "0"; // Se vazio, usa zero como referência
+            
+            try {
+                let num = processar_entrada(valorRaw);
+                const operacaoSelecionada = operacaoSelect.value;
+                const tipoAngulo = document.querySelector('input[name="tipoAngulo"]:checked').value;
+                
+                overlayGrafico.style.opacity = '0';
+                setTimeout(() => overlayGrafico.classList.add('hidden'), 500);
+                
+                resizeCanvas();
+                desenharGraficoDinamico(operacaoSelecionada, num, tipoAngulo);
+            } catch (e) {
+                mostrarResultado("Erro no Gráfico", "Verifique o valor de X digitado.");
+            }
+        }
+
+        // Desenha o gráfico baseado na lógica do Python (Séries de Taylor)
+        function desenharGraficoDinamico(tipo, num_central, tipoAngulo) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // 1. AJUSTE INTELIGENTE DA JANELA (IDÊNTICO AO SEU PYTHON)
+            let x_min, x_max;
+            if (tipoAngulo === "graus" && ["seno", "cosseno", "tangente"].includes(tipo)) {
+                x_min = num_central - 360;
+                x_max = num_central + 360;
+            } else if (["ln", "log"].includes(tipo)) {
+                x_min = 0.1;
+                x_max = num_central > 0 ? num_central + 20 : 20;
+            } else if (tipo === "raiz") {
+                x_min = 0.1;
+                x_max = num_central > 0 ? num_central + 20 : 20;
+            } else if (tipo === "potencia") {
+                x_min = num_central - 3;
+                x_max = num_central + 3;
+            } else {
+                x_min = num_central - 10;
+                x_max = num_central + 10;
+            }
+
+            // 2. COLETAR PONTOS E ACHAR OS LIMITES DE Y
+            const points = [];
+            const steps = 300; // Quantidade de pontinhos para traçar a linha
+            let y_min = Infinity, y_max = -Infinity;
+
+            for (let i = 0; i <= steps; i++) {
+                let x = x_min + (x_max - x_min) * (i / steps);
+                let y = calcularValor(tipo, x, tipoAngulo);
+                
+                // Limita a tangente para não bugar a tela (Igual no python y > 200)
+                if (tipo === "tangente" && (y > 200 || y < -200)) y = NaN;
+
+                if (!isNaN(y) && isFinite(y)) {
+                    if (y < y_min) y_min = y;
+                    if (y > y_max) y_max = y;
+                }
+                points.push({ x, y });
+            }
+
+            // Central exato
+            let y_central = calcularValor(tipo, num_central, tipoAngulo);
+
+            // Ajuste de respiro visual (margem) no topo e no fundo
+            if (y_min === y_max || !isFinite(y_min)) {
+                y_min -= 10; y_max += 10;
+            } else {
+                let padding = (y_max - y_min) * 0.15;
+                y_min -= padding; y_max += padding;
+            }
+
+            // Funções ajudantes para converter o (X,Y) matemático em pixels na tela
+            const mapX = (x) => ((x - x_min) / (x_max - x_min)) * width;
+            const mapY = (y) => height - ((y - y_min) / (y_max - y_min)) * height;
+
+            // 3. DESENHAR EIXOS (LINHAS GUIAS 0)
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.lineWidth = 2;
+            
+            let eixoX_Pixel = mapY(0);
+            let eixoY_Pixel = mapX(0);
+
+            // Desenha a reta Y=0 (Eixo X)
+            if (0 >= y_min && 0 <= y_max) {
+                ctx.beginPath(); ctx.moveTo(0, eixoX_Pixel); ctx.lineTo(width, eixoX_Pixel); ctx.stroke();
+            } else {
+                eixoX_Pixel = height - 20; // Puxa pro rodapé se o 0 estiver fora da visão
+            }
+            // Desenha a reta X=0 (Eixo Y)
+            if (0 >= x_min && 0 <= x_max) {
+                ctx.beginPath(); ctx.moveTo(eixoY_Pixel, 0); ctx.lineTo(eixoY_Pixel, height); ctx.stroke();
+            } else {
+                eixoY_Pixel = 10; // Puxa pro canto se o 0 estiver fora
+            }
+
+            // 4. COLOCAR OS NÚMEROS NOS EIXOS (ESCALA)
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.font = "11px monospace";
+            
+            // Números ao longo do eixo X
+            ctx.textAlign = "center";
+            for(let i = 0; i <= 5; i++) {
+                let valX = x_min + (x_max - x_min) * (i / 5);
+                let px = mapX(valX);
+                // Evita cortar texto nas pontas
+                if(px < 20) px = 20; if(px > width - 20) px = width - 20;
+                let textY = eixoX_Pixel + 15 > height - 5 ? height - 5 : eixoX_Pixel + 15;
+                ctx.fillText(valX.toFixed(1), px, textY);
+            }
+            
+            // Números ao longo do eixo Y
+            ctx.textAlign = "left";
+            for(let i = 1; i <= 4; i++) {
+                let valY = y_min + (y_max - y_min) * (i / 5);
+                let py = mapY(valY);
+                ctx.fillText(valY.toFixed(1), eixoY_Pixel + 5, py + 4);
+            }
+
+            // 5. DESENHAR A CURVA MATEMÁTICA
+            ctx.beginPath();
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00d2ff';
+            ctx.strokeStyle = '#00d2ff';
+
+            let primeiroPonto = true;
+            for (let p of points) {
+                if (isNaN(p.y)) {
+                    ctx.stroke(); // Corta o traço (ex: buraco na tangente)
+                    ctx.beginPath();
+                    primeiroPonto = true;
+                    continue;
+                }
+                
+                let px = mapX(p.x);
+                let py = mapY(p.y);
+                
+                if (primeiroPonto) {
+                    ctx.moveTo(px, py);
+                    primeiroPonto = false;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Tira o neon para o resto
+
+            // 6. DESTACAR O SEU PONTO (X, Y)
+            if (!isNaN(y_central)) {
+                let px = mapX(num_central);
+                let py = mapY(y_central);
+
+                // Linha pontilhada até o eixo X
+                ctx.strokeStyle = 'rgba(255, 41, 184, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(px, eixoX_Pixel);
+                ctx.lineTo(px, py);
+                ctx.stroke();
+                ctx.setLineDash([]); 
+
+                // Bolinha do Ponto
+                ctx.beginPath();
+                ctx.arc(px, py, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff'; 
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ffffff';
+                ctx.fill();
+
+                // Escrever Coordenadas Reais!
+                ctx.fillStyle = '#ffffff';
+                ctx.font = "bold 13px monospace";
+                ctx.shadowBlur = 4;
+                ctx.shadowColor = 'rgba(0,0,0,1)';
+                
+                // Formatação bonita (Ex: (3.14, 0.0000))
+                let textoCoord = `(${num_central.toFixed(2)}, ${y_central.toFixed(4)})`;
+                
+                // Inteligência para não deixar o texto vazar para fora da tela
+                ctx.textAlign = px > width - 100 ? "right" : "left";
+                let offsetX = px > width - 100 ? -12 : 12;
+                let offsetY = py < 30 ? 20 : -12;
+
+                ctx.fillText(textoCoord, px + offsetX, py + offsetY);
+            }
+        }
+
+        // Inicializa o tamanho correto do canvas invisível e dispara o evento de mudança pra checar rádio buttons
+        setTimeout(() => {
+            resizeCanvas();
+            operacaoSelect.dispatchEvent(new Event('change'));
+        }, 100);
+
+    </script>
+</body>
+</html>
